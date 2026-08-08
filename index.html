@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MIDA STORE</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080b18;color:#fff;font-family:system-ui,Arial}.wrap{max-width:1050px;margin:auto;padding:20px}.hero{text-align:center;padding:35px 0}.hero h1{font-size:52px;margin:8px;background:linear-gradient(90deg,#fff,#8c6cff,#35dfff);color:transparent;background-clip:text}.muted{color:#9da7c2}.panel,.card{background:#11182b;border:1px solid #293554;border-radius:16px;padding:18px}.panel{margin:20px 0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.form{display:grid;grid-template-columns:1fr 1fr auto;gap:10px}input,button{padding:12px;border-radius:9px;border:1px solid #33405f;background:#080e1d;color:#fff}button{background:#765cff;font-weight:800;cursor:pointer}.price{font-size:21px;font-weight:900;margin:10px 0}.result{margin-top:12px}.err{color:#ff9aa7}@media(max-width:700px){.grid,.form{grid-template-columns:1fr}.hero h1{font-size:40px}}
+</style></head><body><div class="wrap">
+<section class="hero"><div style="font-size:65px">💎</div><h1>MIDA STORE</h1><p class="muted">Mobile Legends top-up storefront</p></section>
+<section class="panel"><h2>Verify Player</h2><p class="muted">Enter Player ID and Server ID before ordering.</p>
+<div class="form"><input id="pid" placeholder="Player ID" inputmode="numeric"><input id="sid" placeholder="Server ID" inputmode="numeric"><button onclick="check()">🔍 Check Player</button></div><div id="msg" class="result"></div></section>
+<h2>Small Packs</h2><div id="small" class="grid"></div><h2>Large Packs</h2><div id="large" class="grid"></div><h2>Weekly & Twilight Pass</h2><div id="pass" class="grid"></div>
+<section class="panel"><h2>Track Order</h2><div class="form"><input id="oid" placeholder="MIDA-XXXXXXXX"><button onclick="track()">Track</button></div><div id="trackmsg" class="result"></div></section>
+</div>
+<script>
+const small=[["3 💎","₹7"],["5 💎","₹9"],["11 💎","₹16"],["22 💎","₹32"],["56 💎","₹80"],["112 💎","₹160"],["223 💎","₹320"],["279 💎","₹400"],["336 💎","₹480"],["570 💎","₹800"],["1163 💎","₹1599"]];
+const large=[["86 💎","₹128"],["172 💎","₹254"],["429 💎","₹621"],["514 💎","₹735"],["600 💎","₹862"],["706 💎","₹998"],["878 💎","₹1251"],["963 💎","₹1365"],["1049 💎","₹1493"],["1412 💎","₹1995"],["2195 💎","₹3019"],["2901 💎","₹4016"],["3688 💎","₹5037"],["5532 💎","₹7604"],["9288 💎","₹12630"]];
+const pass=[["Weekly Pass 1×","₹152"],["Weekly Pass 2×","₹304"],["Weekly Pass 3×","₹456"],["Weekly Pass 4×","₹608"],["Weekly Pass +172 💎","₹412"],["Twilight Pass","₹837"]];
+function render(id,a){document.getElementById(id).innerHTML=a.map(x=>`<div class="card"><div style="font-size:28px">💎</div><h3>${x[0]}</h3><div class="price">${x[1]}</div><button onclick='buy(${JSON.stringify(x[0])},${JSON.stringify(x[1])})'>Buy Now</button></div>`).join("")}
+render("small",small);render("large",large);render("pass",pass);
+async function check(){const m=document.getElementById("msg");m.textContent="Checking…";const r=await fetch("/api/player/check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({playerId:pid.value.trim(),serverId:sid.value.trim()})});const d=await r.json();m.innerHTML=`<span class="err">⚠ ${d.error}</span>`}
+function buy(p,price){if(!/^\d{4,15}$/.test(pid.value.trim())||!/^\d{1,8}$/.test(sid.value.trim()))return alert("Enter valid Player ID and Server ID, then check the player.");alert("Player verification must be connected to an authorized service before checkout. Package: "+p+" — "+price)}
+async function track(){const b=document.getElementById("trackmsg");const r=await fetch("/api/orders/"+encodeURIComponent(oid.value.trim()));const d=await r.json();b.innerHTML=r.ok?`<b>${d.packageName}</b><br>Status: ${d.status}`:`<span class="err">${d.error}</span>`}
+</script></body></html>
